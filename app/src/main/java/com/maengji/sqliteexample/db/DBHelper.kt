@@ -4,6 +4,8 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.widget.Toast
+import androidx.core.database.getIntOrNull
+import androidx.core.database.getStringOrNull
 import com.maengji.sqliteexample.vo.Person
 
 class DBHelper(
@@ -14,21 +16,30 @@ class DBHelper(
 ) : SQLiteOpenHelper(context, name, factory, version) {
 
     override fun onCreate(db: SQLiteDatabase?) {
-        val sb = StringBuffer()
+        val queryString = """
+         CREATE TABLE TEST_TABLE ( 
+         _ID INTEGER PRIMARY KEY AUTOINCREMENT, 
+         NAME TEXT, 
+         AGE INTEGER,
+         PHONE TEXT,
+         ADDRESS TEXT)
+        """.trimIndent()
 
-        sb.append(" CREATE TABLE TEST_TABLE ( ")
-        sb.append(" _ID INTEGER PRIMARY KEY AUTOINCREMENT, ")
-        sb.append(" NAME TEXT, ")
-        sb.append(" AGE INTEGER, ")
-        sb.append(" PHONE TEXT ) ")
-
-        db!!.execSQL(sb.toString())
+        db!!.execSQL(queryString)
 
         Toast.makeText(context, "Table 생성완료", Toast.LENGTH_SHORT).show()
     }
 
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
         Toast.makeText(context, "버전이 올라갔습니다.", Toast.LENGTH_SHORT).show()
+
+        if (oldVersion == 1 && newVersion == 2) {
+            val queryString = """
+                alter table TEST_TABLE add ADDRESS TEXT    
+            """.trimIndent()
+
+            db?.execSQL(queryString)
+        }
     }
 
     fun testDB() {
@@ -41,18 +52,18 @@ class DBHelper(
 
         val queryString = """
             INSERT INTO TEST_TABLE (
-            NAME, AGE, PHONE )
-            VALUES ( ?, ?, ? )
+            NAME, AGE, ADDRESS, PHONE )
+            VALUES ( ?, ?, ?, ? )
         """.trimIndent()
 
-        db.execSQL(queryString, arrayOf(person.name, person.age.toInt(), person.phone))
+        db.execSQL(queryString, arrayOf(person.name, person.age, person.address, person.phone))
 
         Toast.makeText(context, "Insert 완료", Toast.LENGTH_SHORT).show()
 
     }
 
     fun getAllPersonData(): ArrayList<Person> {
-        val queryString = """ SELECT _ID, NAME, AGE, PHONE FROM TEST_TABLE """
+        val queryString = """ SELECT _ID, NAME, AGE, PHONE, ADDRESS FROM TEST_TABLE """
 
         val db = readableDatabase
 
@@ -63,9 +74,11 @@ class DBHelper(
         while(cursor.moveToNext()) {
             val person = Person(
                 cursor.getInt(0),
-                cursor.getString(1),
-                cursor.getInt(2),
-                cursor.getString(3))
+                cursor.getStringOrNull(1) ?: "",
+                cursor.getIntOrNull(2) ?: 0,
+                cursor.getStringOrNull(3) ?: "",
+                cursor.getStringOrNull(4) ?: ""
+            )
 
             people.add(person)
         }

@@ -46,26 +46,41 @@ class PersonListAdapter(val context: Context, val people: ArrayList<Person>): Ba
             tvPhone.setPadding(20, 0, 20, 0)
             tvPhone.setTextColor(Color.rgb(0,0,0))
 
+            val tvAddress = TextView(context)
+            tvAddress.setPadding(20, 0, 20, 0)
+            tvAddress.setTextColor(Color.rgb(0,0,0))
+
             newConvertView.addView(tvId)
             newConvertView.addView(tvName)
             newConvertView.addView(tvAge)
             newConvertView.addView(tvPhone)
+            newConvertView.addView(tvAddress)
 
-            holder = Holder(tvId, tvName, tvAge, tvPhone)
+            holder = Holder(tvId, tvName, tvAge, tvPhone, tvAddress)
 
             newConvertView.tag = holder
+
+            val person = getItem(position) as Person
+            holder.tvId.setText(person.id.toString())
+            holder.tvName.setText(person.name)
+            holder.tvAge.setText(person.age.toString())
+            holder.tvPhone.setText(person.phone)
+            holder.tvAddress.text = person.address
+
+            return newConvertView
         }
         else {
             holder = convertView.tag as Holder
+
+            val person = getItem(position) as Person
+            holder.tvId.setText(person.id.toString())
+            holder.tvName.setText(person.name)
+            holder.tvAge.setText(person.age.toString())
+            holder.tvPhone.setText(person.phone)
+            holder.tvAddress.text = person.address
+
+            return convertView!!
         }
-
-        val person = getItem(position) as Person
-        holder.tvId.setText(person.id.toString())
-        holder.tvName.setText(person.name)
-        holder.tvAge.setText(person.age.toString())
-        holder.tvPhone.setText(person.phone)
-
-        return convertView!!
     }
 }
 
@@ -73,5 +88,6 @@ class Holder(
     val tvId: TextView,
     val tvName: TextView,
     val tvAge: TextView,
-    val tvPhone: TextView
+    val tvPhone: TextView,
+    val tvAddress: TextView
 )
